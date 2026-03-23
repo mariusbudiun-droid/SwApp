@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SwApp</title>
+<meta name="description" content="Ryanair SwApp Calculator">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#073590">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SwApp">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #073590;
+    --navy2: #0a3fa8;
+    --blue: #0550d4;
+    --orange: #f5c300;
+    --orange2: #ffd740;
+    --white: #ffffff;
+    --grey: #a0b4d6;
+    --green: #f5c300;
+    --green-bg: rgba(245,195,0,0.08);
+    --red: #ff4560;
+    --card: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .glow {
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .glow-1 { top: -200px; left: -100px; background: rgba(245,195,0,0.10); }
+  .glow-2 { bottom: -200px; right: -100px; background: rgba(5,80,212,0.25); }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    padding-top: max(40px, env(safe-area-inset-top));
+    padding-bottom: max(80px, env(safe-area-inset-bottom));
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    width: 48px; height: 48px;
+    background: var(--orange);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  header h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(22px, 4vw, 32px);
+    letter-spacing: 0.5px;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+
+  header h1 span { color: var(--orange); }
+
+  header p {
+    font-size: 13px;
+    color: var(--grey);
+    margin-top: 4px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+  }
+
+  .card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 20px;
+  }
+
+  /* Input grid */
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 500px) {
+    .input-grid { grid-template-columns: 1fr; }
+  }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 8px;
+  }
+
+  .field select {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    padding: 14px 16px;
+    appearance: none;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238899bb' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+  }
+
+  .field select:focus {
+    outline: none;
+    border-color: var(--orange);
+    background-color: rgba(247,96,10,0.08);
+  }
+
+  .field select option {
+    background: #1a2a4a;
+    color: var(--white);
+  }
+
+  /* Results */
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .badge {
+    background: rgba(247,96,10,0.15);
+    border: 1px solid rgba(247,96,10,0.3);
+    color: var(--orange2);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  .badge.green {
+    background: rgba(245,195,0,0.15);
+    border-color: rgba(245,195,0,0.4);
+    color: var(--orange);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--grey);
+  }
+
+  .empty-state .big { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+
+  /* Result rows */
+  .result-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--green-bg);
+    border: 1px solid rgba(245,195,0,0.2);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    animation: slideIn 0.3s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .roster-badge {
+    background: var(--orange);
+    color: #073590;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    width: 60px; height: 60px;
+    border-radius: 10px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .roster-badge .roster-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 1px;
+  }
+
+  .roster-badge .roster-num-big {
+    font-size: 24px;
+    font-weight: 900;
+  }
+
+  .result-info { flex: 1; min-width: 0; }
+
+  .result-info .crew-codes {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--white);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .result-info .crew-codes.empty {
+    color: var(--grey);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 14px;
+    font-family: 'Barlow', sans-serif;
+  }
+
+  .result-info .detail {
+    font-size: 12px;
+    color: var(--orange2);
+  }
+
+  .check { color: var(--orange); font-size: 22px; flex-shrink: 0; }
+
+  /* No results */
+  .no-result {
+    text-align: center;
+    padding: 32px;
+    color: var(--grey);
+    font-size: 14px;
+  }
+
+  /* Admin panel */
+  .admin-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--grey);
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .admin-toggle:hover { border-color: var(--orange); color: var(--orange); }
+
+  .admin-panel { display: none; }
+  .admin-panel.open { display: block; }
+
+  .pin-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .pin-form input {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 16px;
+    padding: 12px 16px;
+    letter-spacing: 4px;
+  }
+
+  .pin-form input:focus { outline: none; border-color: var(--orange); }
+
+  .btn {
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 1px;
+    padding: 12px 24px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .btn:hover { background: var(--orange2); }
+  .btn:active { transform: scale(0.97); }
+  .btn.secondary {
+    background: rgba(255,255,255,0.08);
+    color: var(--white);
+  }
+  .btn.secondary:hover { background: rgba(255,255,255,0.14); }
+
+  .btn.small { font-size: 12px; padding: 8px 16px; }
+
+  .pin-error {
+    color: var(--red);
+    font-size: 13px;
+    margin-bottom: 12px;
+    display: none;
+  }
+
+  /* Rubrica table */
+  .rubrica-grid { display: grid; gap: 10px; }
+
+  .rubrica-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .rubrica-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rubrica-card-header .roster-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 15px;
+    color: var(--orange);
+    min-width: 60px;
+  }
+
+  .rubrica-col-labels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    flex: 1;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--grey);
+    padding: 0 2px;
+  }
+
+  .rubrica-colleagues { padding: 8px 14px; display: grid; gap: 6px; }
+
+  .rubrica-colleague-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .rubrica-card input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    padding: 7px 10px;
+    width: 100%;
+  }
+
+  .rubrica-card input.crew-input {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .rubrica-card input.phone-input { color: #25d366; }
+  .rubrica-card input::placeholder { color: rgba(136,153,187,0.35); }
+  .rubrica-card input:focus { outline: none; border-color: rgba(245,195,0,0.5); }
+
+  .save-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .save-msg {
+    font-size: 13px;
+    color: var(--orange);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .save-msg.show { opacity: 1; }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 16px 20px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  .legend-item {
+    font-size: 12px;
+    color: var(--grey);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--orange);
+    flex-shrink: 0;
+  }
+
+  .wa-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #25d366;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    padding: 7px 12px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+    margin-top: 6px;
+  }
+  .wa-btn:hover { background: #1ebe5d; }
+  .wa-btn:active { transform: scale(0.96); }
+  .wa-btn svg { flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+
+<div class="wrapper">
+
+  <header>
+    <div class="logo">✈</div>
+    <div>
+      <h1>Ryanair <span>Sw<strong style="font-size:1.15em;letter-spacing:1px">APP</strong></span> Calculator</h1>
+      <p>Ryanair SwApp Calculator · Cabin Crew</p>
+    </div>
+  </header>
+
+  <!-- Input -->
+  <div class="card">
+    <div class="card-title">Your details</div>
+    <div class="input-grid">
+      <div class="field">
+        <label>Your Roster</label>
+        <select id="myRoster">
+          <option value="">— Select —</option>
+          <option value="1">Roster 1</option>
+          <option value="2">Roster 2</option>
+          <option value="3">Roster 3</option>
+          <option value="4">Roster 4</option>
+          <option value="5">Roster 5</option>
+          <option value="6">Roster 6</option>
+          <option value="7">Roster 7</option>
+          <option value="8">Roster 8</option>
+          <option value="9">Roster 9</option>
+          <option value="10">Roster 10</option>
+          <option value="11">Roster 11</option>
+          <option value="12">Roster 12</option>
+          <option value="13">Roster 13</option>
+          <option value="14">Roster 14</option>
+          <option value="15">Roster 15</option>
+          <option value="16">Roster 16</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Shift to swap</label>
+        <select id="myShift">
+          <option value="">— Select —</option>
+          <optgroup label="Early">
+            <option value="1">Early 1</option>
+            <option value="2">Early 2</option>
+            <option value="3">Early 3</option>
+            <option value="4">Early 4</option>
+            <option value="5">Early 5</option>
+          </optgroup>
+          <optgroup label="Late">
+            <option value="9">Late 1</option>
+            <option value="10">Late 2</option>
+            <option value="11">Late 3</option>
+            <option value="12">Late 4</option>
+            <option value="13">Late 5</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="card">
+    <div class="results-header">
+      <div class="card-title" style="margin-bottom:0">Available colleagues</div>
+      <div id="resultBadge" class="badge" style="display:none"></div>
+    </div>
+    <div id="resultsContainer">
+      <div class="empty-state">
+        <div class="big">🔍</div>
+        <p>Select your roster and the shift<br>you want to swap</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin -->
+  <button class="admin-toggle" onclick="toggleAdmin()">
+    👥 Crew Code Directory
+  </button>
+
+  <div class="admin-panel card" id="adminPanel" style="margin-top:10px; display:none">
+
+    <!-- PIN gate -->
+    <div id="pinSection">
+      <div class="card-title" id="pinSectionTitle">Enter your PIN</div>
+      <div class="pin-error" id="pinError">Incorrect PIN. Please try again.</div>
+      <div class="pin-form">
+        <input type="password" id="pinInput" placeholder="PIN" maxlength="6"
+               onkeydown="if(event.key==='Enter') checkPin()">
+        <button class="btn" onclick="checkPin()">Enter</button>
+      </div>
+      <div class="locked-msg" id="pinHint">🔒 Enter your PIN to edit crew codes</div>
+    </div>
+
+    <!-- Editor -->
+    <div id="rubricaSection" style="display:none">
+      <div class="card-title">👥 Crew Code Directory</div>
+      <div class="rubrica-grid" id="rubricaGrid"></div>
+
+      <div class="save-bar">
+        <button class="btn secondary small" onclick="lockAdmin()">🔒 Lock</button>
+        <span class="save-msg" id="saveMsg"></span>
+      </div>
+
+      <!-- Export / Import -->
+      <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border)">
+        <div class="card-title" style="margin-bottom:14px">Share / Import Directory</div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px">
+          <button class="btn" onclick="exportData()" style="font-size:13px">
+            📤 Export my directory
+          </button>
+          <button class="btn secondary" onclick="toggleImport()" style="font-size:13px">
+            📥 Import from someone
+          </button>
+        </div>
+
+        <!-- Export box -->
+        <div id="exportBox" style="display:none; margin-bottom:12px">
+          <div style="font-size:11px; color:var(--grey); letter-spacing:1px; text-transform:uppercase; margin-bottom:8px">
+            Copy this code and send it to your colleague:
+          </div>
+          <textarea id="exportText" readonly
+            style="width:100%; height:100px; background:rgba(0,0,0,0.3); border:1px solid var(--border);
+                   border-radius:10px; color:var(--orange); font-family:monospace; font-size:11px;
+                   padding:12px; resize:none; outline:none; word-break:break-all"></textarea>
+          <button class="btn" style="width:100%; margin-top:8px; font-size:13px" onclick="copyExport()">
+            📋 Copy to clipboard
+          </button>
+          <div id="exportCopiedMsg" style="text-align:center; margin-top:6px; font-size:12px; color:var(--orange); display:none">
+            ✓ Copied! Send it via WhatsApp or any message.
+          </div>
+        </div>
+
+        <!-- Import box -->
+        <div id="importBox" style="display:none">
+          <div style="font-size:11px; color:var(--grey); letter-spacing:1px; text-transform:uppercase; margin-bottom:8px">
+            Paste the code you received:
+          </div>
+          <textarea id="importText" placeholder="Paste the exported code here..."
+            style="width:100%; height:100px; background:rgba(255,255,255,0.05); border:1px solid var(--border);
+                   border-radius:10px; color:var(--white); font-family:monospace; font-size:11px;
+                   padding:12px; resize:none; outline:none; word-break:break-all"></textarea>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px">
+            <button class="btn" onclick="importData()" style="font-size:13px">✅ Import</button>
+            <button class="btn secondary" onclick="toggleImport()" style="font-size:13px">Cancel</button>
+          </div>
+          <div id="importMsg" style="text-align:center; margin-top:8px; font-size:12px; display:none"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Feedback & Support -->
+  <a href="https://wa.me/393407894585?text=Hi%2C%20I'm%20writing%20about%20SwApp%20%E2%80%94%20" target="_blank"
+     style="display:flex; align-items:center; justify-content:center; gap:10px;
+            margin-top:8px; padding:14px 20px; border-radius:12px;
+            background:rgba(37,211,102,0.08); border:1px solid rgba(37,211,102,0.2);
+            color:#25d366; text-decoration:none; font-family:'Barlow',sans-serif;
+            font-size:14px; font-weight:600;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.855L.057 23.882l6.204-1.448A11.935 11.935 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.366l-.36-.213-3.681.859.924-3.573-.234-.368A9.818 9.818 0 1112 21.818z"/>
+    </svg>
+    Feedback & Suggestions
+  </a>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  CREW DATA — up to 5 colleagues per roster
+//  Each entry: { code: "ABCD12", phone: "+39333123456" }
+//  Phone must include country code. Leave "" if unknown.
+// ═══════════════════════════════════════════════════════════════════
+const CREW = {
+   1: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+   2: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+   3: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+   4: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+   5: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+   6: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+   7: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+   8: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+   9: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+  10: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+  11: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+  12: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+  13: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+  14: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+  15: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+  16: [{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""},{code:"",phone:""}],
+};
+// ═══════════════════════════════════════════════════════════════════
+
+// ─── LOGIC ───────────────────────────────────────────────────────
+function mod16(x) { return ((x - 1 + 16) % 16) + 1; }
+
+function getSwapRosters(myRoster, myDay) {
+  // Official swap table formula:
+  // Early Day N: myRoster +9+N and +11+N (mod 16)
+  // Late Day N:  myRoster +1+N and +3+N  (mod 16)
+  const isEarly = myDay <= 5;
+  const N = isEarly ? myDay : myDay - 8;
+  if (isEarly) {
+    return [mod16(myRoster + 8 + N), mod16(myRoster + 10 + N)];
+  } else {
+    return [mod16(myRoster + N), mod16(myRoster + 2 + N)];
+  }
+}
+
+function calculate() {
+  const myRoster  = parseInt(document.getElementById("myRoster").value);
+  const myDay     = parseInt(document.getElementById("myShift").value);
+  const container = document.getElementById("resultsContainer");
+  const badge     = document.getElementById("resultBadge");
+
+  if (!myRoster || !myDay) {
+    badge.style.display = "none";
+    container.innerHTML = `<div class="empty-state"><div class="big">🔍</div><p>Select your roster and the shift<br>you want to swap</p></div>`;
+    return;
+  }
+
+  const results = getSwapRosters(myRoster, myDay)
+    .filter(r => r !== myRoster)
+    .map(r => ({ roster: r }));
+
+  if (results.length === 0) {
+    badge.textContent = "0 available";
+    badge.className = "badge";
+    badge.style.display = "inline-block";
+    container.innerHTML = `<div class="no-result">😔 No colleagues available for this shift</div>`;
+    return;
+  }
+
+  badge.textContent = results.length + " available";
+  badge.className = "badge green";
+  badge.style.display = "inline-block";
+
+  container.innerHTML = results.map((r, idx) => {
+    const raw = CREW[r.roster];
+    const colleagues = (Array.isArray(raw) ? raw : Object.values(raw || {}))
+      .filter(c => c && c.code && c.code.trim() !== "");
+
+    const colleaguesHtml = colleagues.length > 0
+      ? colleagues.map(c => {
+          const phone = (c.phone || "").replace(/[\s\-\+]/g, "");
+          const waBtn = phone
+            ? `<a class="wa-btn" href="https://wa.me/${phone}" target="_blank">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                  <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.855L.057 23.882l6.204-1.448A11.935 11.935 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.366l-.36-.213-3.681.859.924-3.573-.234-.368A9.818 9.818 0 1112 21.818z"/>
+                </svg>
+                ${c.code.toUpperCase()}
+              </a>`
+            : `<span class="crew-codes" style="font-size:14px">${c.code.toUpperCase()}</span>`;
+          return `<div style="display:flex; align-items:center; gap:8px; margin-top:4px">${waBtn}</div>`;
+        }).join("")
+      : `<div class="crew-codes empty">No crew codes added yet</div>`;
+
+    return `
+      <div class="result-item" style="animation-delay:${idx * 0.06}s">
+        <div class="roster-badge">
+          <span class="roster-label">Roster</span>
+          <span class="roster-num-big">${r.roster}</span>
+        </div>
+        <div class="result-info">
+          ${colleaguesHtml}
+        </div>
+        <div class="check">✓</div>
+      </div>`;
+  }).join("");
+}
+
+// ─── EVENTS ──────────────────────────────────────────────────────
+document.getElementById("myRoster").addEventListener("change", calculate);
+document.getElementById("myShift").addEventListener("change", calculate);
+
+// ─── ADMIN ───────────────────────────────────────────────────────
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem("ryanair_crew");
+    if (raw) {
+      const saved = JSON.parse(raw);
+      Object.keys(saved).forEach(r => { CREW[r] = saved[r]; });
+    }
+  } catch(e) {}
+}
+loadSaved();
+
+function getUserPin() {
+  return localStorage.getItem("swapp_pin") || null;
+}
+
+function toggleAdmin() {
+  const panel = document.getElementById("adminPanel");
+  const isOpen = panel.style.display !== "none";
+  panel.style.display = isOpen ? "none" : "block";
+  if (!isOpen) {
+    const pin = getUserPin();
+    if (!pin) {
+      document.getElementById("pinSectionTitle").textContent = "Set your PIN";
+      document.getElementById("pinHint").textContent = "🔑 First time? Choose a PIN to protect your directory";
+      document.getElementById("pinInput").placeholder = "Choose a PIN";
+    } else {
+      document.getElementById("pinSectionTitle").textContent = "Enter your PIN";
+      document.getElementById("pinHint").textContent = "🔒 Enter your PIN to edit crew codes";
+      document.getElementById("pinInput").placeholder = "PIN";
+    }
+    document.getElementById("pinSection").style.display = "block";
+    document.getElementById("rubricaSection").style.display = "none";
+    document.getElementById("pinInput").value = "";
+  }
+}
+
+function checkPin() {
+  const val = document.getElementById("pinInput").value;
+  if (!val) return;
+  const savedPin = getUserPin();
+  if (!savedPin) {
+    localStorage.setItem("swapp_pin", val);
+    document.getElementById("pinSection").style.display = "none";
+    document.getElementById("rubricaSection").style.display = "block";
+    buildGrid();
+  } else if (val === savedPin) {
+    document.getElementById("pinSection").style.display = "none";
+    document.getElementById("rubricaSection").style.display = "block";
+    buildGrid();
+  } else {
+    const err = document.getElementById("pinError");
+    err.style.display = "block";
+    document.getElementById("pinInput").value = "";
+    setTimeout(() => err.style.display = "none", 2000);
+  }
+}
+
+function lockAdmin() {
+  document.getElementById("pinSection").style.display = "block";
+  document.getElementById("rubricaSection").style.display = "none";
+  document.getElementById("adminPanel").style.display = "none";
+  document.getElementById("pinInput").value = "";
+}
+
+function buildGrid() {
+  const grid = document.getElementById("rubricaGrid");
+  grid.innerHTML = Array.from({length: 16}, (_, i) => {
+    const R = i + 1;
+    const colleagues = CREW[R] || [];
+    const rows = [0,1,2,3,4].map(k => {
+      const c = colleagues[k] || {code:"", phone:""};
+      return `<div class="rubrica-colleague-row" data-k="${k}">
+        <input class="crew-input" data-r="${R}" data-k="${k}" data-field="code"
+               value="${c.code||""}" placeholder="Crew code"
+               oninput="autosave()">
+        <input class="phone-input" data-r="${R}" data-k="${k}" data-field="phone"
+               value="${c.phone||""}" placeholder="+39 333 123 4567"
+               oninput="autosave()">
+      </div>`;
+    }).join("");
+    return `<div class="rubrica-card rubrica-data-card" data-r="${R}">
+      <div class="rubrica-card-header">
+        <div class="roster-num">Roster ${R}</div>
+        <div class="rubrica-col-labels"><span>Crew Code</span><span>📱 WhatsApp</span></div>
+      </div>
+      <div class="rubrica-colleagues">${rows}</div>
+    </div>`;
+  }).join("");
+}
+
+function autosave() {
+  const newCrew = {};
+  document.querySelectorAll(".rubrica-data-card").forEach(card => {
+    const R = parseInt(card.dataset.r);
+    newCrew[R] = [0,1,2,3,4].map(k => {
+      const codeEl  = card.querySelector(`input[data-k="${k}"][data-field="code"]`);
+      const phoneEl = card.querySelector(`input[data-k="${k}"][data-field="phone"]`);
+      return {
+        code:  codeEl  ? codeEl.value.trim().toUpperCase()  : "",
+        phone: phoneEl ? phoneEl.value.trim() : ""
+      };
+    });
+  });
+  localStorage.setItem("ryanair_crew", JSON.stringify(newCrew));
+  Object.assign(CREW, newCrew);
+  calculate();
+  const msg = document.getElementById("saveMsg");
+  msg.textContent = "✓ Saved!";
+  msg.classList.add("show");
+  clearTimeout(window._saveTimer);
+  window._saveTimer = setTimeout(() => msg.classList.remove("show"), 1500);
+}
+</script>
+
+<script>
+// ─── EXPORT / IMPORT ─────────────────────────────────────────────
+function exportData() {
+  // Save current grid state first
+  autosave();
+  const json = localStorage.getItem("ryanair_crew") || JSON.stringify(CREW);
+  // Encode as base64 to make it a compact shareable string
+  const encoded = btoa(unescape(encodeURIComponent(json)));
+  document.getElementById("exportText").value = encoded;
+  document.getElementById("exportBox").style.display = "block";
+  document.getElementById("importBox").style.display = "none";
+}
+
+function copyExport() {
+  const text = document.getElementById("exportText");
+  text.select();
+  document.execCommand("copy");
+  // Fallback for mobile
+  navigator.clipboard && navigator.clipboard.writeText(text.value).catch(() => {});
+  const msg = document.getElementById("exportCopiedMsg");
+  msg.style.display = "block";
+  setTimeout(() => msg.style.display = "none", 3000);
+}
+
+function toggleImport() {
+  const box = document.getElementById("importBox");
+  box.style.display = box.style.display === "none" ? "block" : "none";
+  document.getElementById("exportBox").style.display = "none";
+  document.getElementById("importText").value = "";
+  document.getElementById("importMsg").style.display = "none";
+}
+
+function importData() {
+  const raw = document.getElementById("importText").value.trim();
+  const msg = document.getElementById("importMsg");
+  if (!raw) {
+    msg.textContent = "⚠️ Please paste a code first.";
+    msg.style.color = "var(--red)";
+    msg.style.display = "block";
+    return;
+  }
+  try {
+    const json = decodeURIComponent(escape(atob(raw)));
+    const imported = JSON.parse(json);
+    // Validate it looks like crew data
+    if (typeof imported !== "object" || !imported[1]) throw new Error("Invalid");
+    localStorage.setItem("ryanair_crew", JSON.stringify(imported));
+    Object.assign(CREW, imported);
+    buildGrid();
+    calculate();
+    msg.textContent = "✅ Directory imported successfully!";
+    msg.style.color = "var(--orange)";
+    msg.style.display = "block";
+    document.getElementById("importText").value = "";
+    setTimeout(() => {
+      document.getElementById("importBox").style.display = "none";
+      msg.style.display = "none";
+    }, 2000);
+  } catch(e) {
+    msg.textContent = "❌ Invalid code. Make sure you copied it completely.";
+    msg.style.color = "var(--red)";
+    msg.style.display = "block";
+  }
+}
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

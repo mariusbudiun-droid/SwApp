@@ -1,11 +1,11 @@
 {
-  "name": "Ryanair SwApp Calculator",
-  "short_name": "SwApp",
-  "description": "Ryanair SwApp Calculator",
+  "name": "SwAPP · Crew Swap Calculator",
+  "short_name": "SwAPP",
+  "description": "Cabin Crew PSR Swap Calculator",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#073590",
-  "theme_color": "#073590",
+  "background_color": "#EEF4FF",
+  "theme_color": "#2563EB",
   "orientation": "portrait",
   "icons": [
     {

@@ -319,6 +319,28 @@
 </head>
 <body>
 
+<!-- Migration banner -->
+<div id="migrationBanner" style="
+  position: relative;
+  z-index: 10;
+  background: rgba(251,146,60,0.10);
+  border-bottom: 1px solid rgba(251,146,60,0.25);
+  padding: 12px 20px;
+  text-align: center;
+  font-family: 'Barlow', sans-serif;
+  font-size: 13px;
+  color: #FB923C;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+">
+  📦 Coming from the old app? Go to <strong>Crew Code Directory → Import from someone</strong> to restore your contacts.
+  <button onclick="document.getElementById('migrationBanner').style.display='none'"
+    style="background:none; border:none; color:#FB923C; cursor:pointer; font-size:18px; line-height:1; padding:0 4px; margin-left:4px">✕</button>
+</div>
+
 <div class="glow glow-1"></div>
 <div class="glow glow-2"></div>
 

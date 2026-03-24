@@ -354,6 +354,38 @@
 
   <div class="settings-section">
     <div class="settings-section-title">Feedback & Support</div>
+    <div class="settings-section">
+  <div class="settings-section-title">Share / Install</div>
+  <div style="font-size:13px; color:var(--text2); margin-bottom:12px">
+    Share this app with your colleagues or save it to your phone's home screen.
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
+    <button class="btn" style="font-size:13px" onclick="copyAppLink()">
+      📋 Copy app link
+    </button>
+    <div style="font-size:11px; color:var(--text2)">
+      Then send it via WhatsApp / email / QR code.
+    </div>
+  </div>
+  <div class="disclaimer-box" style="margin-top:10px">
+    <p><strong>📱 To install on your phone:</strong></p>
+    <p><strong>iPhone (Safari):</strong> Tap <strong>Share → Add to Home Screen</strong>. Open the link in Safari, then save it.</p>
+    <p><strong>Android (Chrome):</strong> Tap the <strong>three dots → Add to Home screen</strong>.</p>
+    <p>This installs SwAPP as an app icon on your device.</p>
+  </div>
+  <div class="settings-section">
+  <div class="settings-section-title">Update</div>
+  <div style="font-size:13px; color:var(--text2); margin-bottom:12px">
+    Check for and apply new version of the app if available.
+  </div>
+  <button class="btn" style="font-size:13px" onclick="checkAndApplyUpdate()">
+    🔄 Update if available
+  </button>
+  <div id="updateMsg" style="font-size:12px; margin-top:6px; display:none"></div>
+</div>
+
+</div>
+
     <div style="font-size:13px; color:var(--text2); margin-bottom:12px">Having trouble or want to suggest something? Write directly to the developer.</div>
     <a href="https://wa.me/393407894585?text=Hi%2C%20I'm%20writing%20about%20SwApp%20%E2%80%94%20" target="_blank"
        style="display:flex; align-items:center; justify-content:center; gap:10px;
@@ -725,6 +757,57 @@ function changePin(){
   m.textContent="✅ PIN updated successfully!";m.style.color="var(--green)";
   setTimeout(()=>m.style.display="none",2500);
 }
+function copyAppLink(){
+  const l=window.location.href;
+  navigator.clipboard&&navigator.clipboard.writeText(l).then(()=>alert(`App link copied!\n${l}`)).catch(()=>prompt("App link (copy manually):",l));
+}
+function checkAndApplyUpdate(){
+  const m=document.getElementById("updateMsg");
+  m.style.display="block";
+  m.textContent="Checking for updates…";
+  m.style.color="var(--text2)";
+  setTimeout(()=>{
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.ready.then(reg=>{
+        reg.update().then(()=>{
+          setTimeout(()=>{
+            m.textContent="✅ Update ready. Reload the page to use the new version.";
+            m.style.color="var(--green)";
+          },200);
+        }).catch(e=>{
+          console.warn("Update failed",e);
+          m.textContent="⚠️ Cannot update right now. Try again later.";
+          m.style.color="var(--red)";
+        });
+      }).catch(e=>{
+        console.warn("Service worker ready failed",e);
+        m.textContent="⚠️ Offline or update not available.";
+        m.style.color="var(--red)";
+      });
+    } else {
+      m.textContent="⚠️ Browser doesn't support updates.";
+      m.style.color="var(--red)";
+    }
+  },100);
+}
+
+(window.addEventListener||window.addListener)?.('load',()=>{
+  if('serviceWorker' in navigator){
+    const reg=navigator.serviceWorker?.ready?.then?.(reg=>reg.waiting);
+    if(reg){
+      reg.then(waiting=>{
+        if(waiting){
+          const m=document.getElementById("updateMsg");
+          m&&(
+            m.textContent="🆕 New version available. Tap 'Update if available' or reload the page.",
+            m.style.display="block",
+            m.style.color="var(--primary)"
+          );
+        }
+      });
+    }
+  }
+});
 
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});

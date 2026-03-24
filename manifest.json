@@ -1,7 +1,7 @@
 {
-  "name": "SwAPP · Crew Swap Calculator",
+  "name": "SwAPP · Swap Calculator",
   "short_name": "SwAPP",
-  "description": "Cabin Crew PSR Swap Calculator",
+  "description": "Cabin Crew Swap Calculator",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#EEF4FF",

@@ -5,15 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>SwAPP</title>
 <meta name="description" content="SwAPP · Crew Swap Calculator">
-
-<!-- PWA -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1C1C28">
+<meta name="theme-color" id="themeColor" content="#1C1C28">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SwAPP">
 <link rel="apple-touch-icon" href="icon-192.png">
-
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -31,6 +28,27 @@
     --result-bg:     rgba(129,140,248,0.06);
     --result-border: rgba(129,140,248,0.2);
     --green:         #34D399;
+    --overlay:       rgba(0,0,0,0.7);
+    --grid-line:     rgba(129,140,248,0.03);
+  }
+
+  body.light {
+    --bg:            #F1F5FF;
+    --surface:       #FFFFFF;
+    --primary:       #4F46E5;
+    --primary2:      #4338CA;
+    --accent:        #EA6C00;
+    --text:          #111118;
+    --text2:         #6B7280;
+    --border:        rgba(79,70,229,0.15);
+    --border2:       rgba(0,0,0,0.07);
+    --card-shadow:   0 2px 8px rgba(79,70,229,0.08), 0 0 0 1px rgba(79,70,229,0.07);
+    --red:           #EF4444;
+    --result-bg:     rgba(79,70,229,0.05);
+    --result-border: rgba(79,70,229,0.18);
+    --green:         #059669;
+    --overlay:       rgba(0,0,0,0.45);
+    --grid-line:     rgba(79,70,229,0.04);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -41,260 +59,176 @@
     font-family: 'Barlow', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
   }
 
   body::before {
     content: '';
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background-image:
-      linear-gradient(rgba(129,140,248,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(129,140,248,0.03) 1px, transparent 1px);
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
     background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
+    pointer-events: none; z-index: 0;
   }
 
-  .glow {
-    position: fixed;
-    width: 600px; height: 600px;
-    border-radius: 50%;
-    filter: blur(130px);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .glow-1 { top: -200px; left: -150px; background: rgba(99,102,241,0.12); }
-  .glow-2 { bottom: -200px; right: -150px; background: rgba(251,146,60,0.08); }
+  .glow { position: fixed; width: 600px; height: 600px; border-radius: 50%; filter: blur(130px); pointer-events: none; z-index: 0; }
+  .glow-1 { top: -200px; left: -150px; background: rgba(99,102,241,0.10); }
+  .glow-2 { bottom: -200px; right: -150px; background: rgba(251,146,60,0.07); }
 
   .wrapper {
-    position: relative;
-    z-index: 1;
-    max-width: 860px;
-    margin: 0 auto;
+    position: relative; z-index: 1;
+    max-width: 860px; margin: 0 auto;
     padding: 40px 24px 80px;
     padding-top: max(40px, env(safe-area-inset-top));
     padding-bottom: max(80px, env(safe-area-inset-bottom));
   }
 
   header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 40px;
-    padding-bottom: 24px;
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 40px; padding-bottom: 24px;
     border-bottom: 1px solid var(--border);
   }
 
   .logo {
     width: 50px; height: 50px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
-    box-shadow: 0 0 20px rgba(129,140,248,0.15);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(129,140,248,0.12);
   }
+
+  .header-text { flex: 1; }
 
   header h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: clamp(22px, 4vw, 30px);
-    letter-spacing: 1px;
-    line-height: 1.1;
-    text-transform: uppercase;
-    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+    font-size: clamp(22px, 4vw, 30px); letter-spacing: 1px;
+    line-height: 1.1; text-transform: uppercase; color: var(--text);
   }
-
   header h1 .highlight { color: var(--primary); }
   header h1 .sub { color: var(--text2); font-weight: 400; font-size: 0.72em; letter-spacing: 1px; }
   header p { font-size: 13px; color: var(--text2); margin-top: 5px; }
 
+  .settings-btn {
+    width: 40px; height: 40px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text2); font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s; box-shadow: var(--card-shadow);
+  }
+  .settings-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+  #migrationBanner {
+    position: relative; z-index: 10;
+    background: rgba(251,146,60,0.10);
+    border-bottom: 1px solid rgba(251,146,60,0.25);
+    padding: 12px 20px; text-align: center;
+    font-family: 'Barlow', sans-serif; font-size: 13px; color: #FB923C;
+    display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+  }
+  #migrationBanner button { background: none; border: none; color: #FB923C; cursor: pointer; font-size: 18px; line-height: 1; padding: 0 4px; margin-left: 4px; }
+
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px 28px;
-    margin-bottom: 14px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px 28px; margin-bottom: 14px;
     box-shadow: var(--card-shadow);
   }
 
   .card-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 10px;
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    color: var(--primary);
-    margin-bottom: 18px;
-    opacity: 0.8;
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+    font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--primary); margin-bottom: 18px; opacity: 0.8;
   }
 
   .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   @media (max-width: 500px) { .input-grid { grid-template-columns: 1fr; } }
 
-  .field label {
-    display: block;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--text2);
-    margin-bottom: 8px;
-  }
+  .field label { display: block; font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
 
   .field select {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    color: var(--text);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 600;
-    font-size: 18px;
-    padding: 13px 40px 13px 16px;
-    appearance: none;
-    cursor: pointer;
-    transition: border-color 0.2s;
+    width: 100%; background: var(--bg); border: 1px solid var(--border2);
+    border-radius: 10px; color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 18px;
+    padding: 13px 40px 13px 16px; appearance: none; cursor: pointer; transition: border-color 0.2s;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394A3B8' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 16px center;
+    background-repeat: no-repeat; background-position: right 16px center;
   }
-
   .field select:focus { outline: none; border-color: var(--primary); }
-  .field select option { background: #1C1C28; color: var(--text); }
+  .field select option { background: var(--surface); color: var(--text); }
 
   .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 
-  .badge {
-    background: rgba(148,163,184,0.1);
-    border: 1px solid rgba(148,163,184,0.2);
-    color: var(--text2);
-    font-size: 11px; font-weight: 600;
-    padding: 4px 12px; border-radius: 20px;
-  }
-
-  .badge.green {
-    background: rgba(129,140,248,0.12);
-    border-color: rgba(129,140,248,0.3);
-    color: var(--primary);
-  }
+  .badge { background: rgba(148,163,184,0.1); border: 1px solid rgba(148,163,184,0.2); color: var(--text2); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+  .badge.green { background: rgba(129,140,248,0.12); border-color: rgba(129,140,248,0.3); color: var(--primary); }
 
   .empty-state { text-align: center; padding: 40px 20px; color: var(--text2); }
   .empty-state .big { font-size: 40px; margin-bottom: 12px; }
   .empty-state p { font-size: 14px; line-height: 1.6; }
 
   .result-item {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 20px;
-    background: var(--result-bg);
-    border: 1px solid var(--result-border);
-    border-radius: 12px;
-    margin-bottom: 10px;
-    animation: slideIn 0.3s ease forwards;
-    opacity: 0;
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 20px; background: var(--result-bg);
+    border: 1px solid var(--result-border); border-radius: 12px;
+    margin-bottom: 10px; animation: slideIn 0.3s ease forwards; opacity: 0;
   }
 
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes slideIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
   .roster-badge {
     background: linear-gradient(135deg, var(--primary2), var(--primary));
-    color: #fff;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    width: 60px; height: 60px;
-    border-radius: 12px;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    flex-shrink: 0;
-    line-height: 1;
-    box-shadow: 0 4px 14px rgba(99,102,241,0.3);
+    color: #fff; font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+    width: 60px; height: 60px; border-radius: 12px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex-shrink: 0; line-height: 1; box-shadow: 0 4px 14px rgba(99,102,241,0.3);
   }
-
   .roster-badge .roster-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.8; margin-bottom: 2px; }
   .roster-badge .roster-num-big { font-size: 24px; font-weight: 900; }
   .result-info { flex: 1; min-width: 0; }
-
-  .result-info .crew-codes {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 600; font-size: 17px; color: var(--text);
-  }
-
-  .result-info .crew-codes.empty {
-    color: var(--text2); font-style: italic; font-weight: 400;
-    font-size: 14px; font-family: 'Barlow', sans-serif;
-  }
-
+  .result-info .crew-codes { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 17px; color: var(--text); }
+  .result-info .crew-codes.empty { color: var(--text2); font-style: italic; font-weight: 400; font-size: 14px; font-family: 'Barlow', sans-serif; }
   .check { color: var(--green); font-size: 20px; flex-shrink: 0; }
   .no-result { text-align: center; padding: 32px; color: var(--text2); font-size: 14px; }
 
   .admin-toggle {
-    display: flex; align-items: center; gap: 10px;
-    cursor: pointer; padding: 14px 20px; border-radius: 12px;
-    border: 1px solid var(--border); background: var(--surface);
-    color: var(--text2); font-family: 'Barlow', sans-serif;
-    font-size: 13px; font-weight: 600; transition: all 0.2s;
-    width: 100%; margin-top: 8px; box-shadow: var(--card-shadow);
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    padding: 14px 20px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text2);
+    font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 600;
+    transition: all 0.2s; width: 100%; margin-top: 8px; box-shadow: var(--card-shadow);
   }
   .admin-toggle:hover { border-color: var(--primary); color: var(--primary); }
 
   .pin-form { display: flex; gap: 10px; margin-bottom: 20px; }
-
   .pin-form input {
     flex: 1; background: var(--bg); border: 1px solid var(--border2);
     border-radius: 10px; color: var(--text); font-family: 'Barlow', sans-serif;
     font-size: 16px; padding: 12px 16px; letter-spacing: 4px;
   }
   .pin-form input:focus { outline: none; border-color: var(--primary); }
+  .pin-error { color: var(--red); font-size: 13px; margin-bottom: 12px; display: none; }
 
   .btn {
-    background: var(--primary); color: #0F0F1A; border: none;
+    background: var(--primary); color: #fff; border: none;
     border-radius: 10px; font-family: 'Barlow Condensed', sans-serif;
     font-weight: 700; font-size: 15px; letter-spacing: 1px;
     padding: 12px 24px; cursor: pointer; text-transform: uppercase;
     transition: background 0.2s, transform 0.1s;
   }
-  .btn:hover { background: #a5b4fc; }
+  body:not(.light) .btn { color: #0F0F1A; }
+  .btn:hover { opacity: 0.88; }
   .btn:active { transform: scale(0.97); }
   .btn.secondary { background: var(--bg); color: var(--text2); border: 1px solid var(--border2); }
   .btn.secondary:hover { border-color: var(--primary); color: var(--primary); }
   .btn.small { font-size: 12px; padding: 8px 16px; }
 
-  .pin-error { color: var(--red); font-size: 13px; margin-bottom: 12px; display: none; }
-
   .rubrica-grid { display: grid; gap: 10px; }
   .rubrica-card { background: var(--bg); border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; }
-
-  .rubrica-card-header {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 14px; background: rgba(129,140,248,0.05);
-    border-bottom: 1px solid var(--border2);
-  }
-
-  .rubrica-card-header .roster-num {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900; font-size: 15px; color: var(--primary); min-width: 60px;
-  }
-
-  .rubrica-col-labels {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex: 1;
-    font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--text2); padding: 0 2px;
-  }
-
+  .rubrica-card-header { display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: rgba(129,140,248,0.05); border-bottom: 1px solid var(--border2); }
+  .rubrica-card-header .roster-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 15px; color: var(--primary); min-width: 60px; }
+  .rubrica-col-labels { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex: 1; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); padding: 0 2px; }
   .rubrica-colleagues { padding: 8px 14px; display: grid; gap: 6px; }
   .rubrica-colleague-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; align-items: center; }
-
-  .rubrica-card input {
-    background: var(--surface); border: 1px solid var(--border2);
-    border-radius: 8px; color: var(--text); font-family: 'Barlow', sans-serif;
-    font-size: 13px; padding: 7px 10px; width: 100%;
-  }
+  .rubrica-card input { background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-family: 'Barlow', sans-serif; font-size: 13px; padding: 7px 10px; width: 100%; }
   .rubrica-card input.crew-input { text-transform: uppercase; letter-spacing: 1px; }
   .rubrica-card input.phone-input { color: #25d366; }
   .rubrica-card input::placeholder { color: var(--text2); opacity: 0.4; }
@@ -310,35 +244,135 @@
     font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
     font-size: 13px; letter-spacing: 0.5px; padding: 7px 12px;
     cursor: pointer; text-decoration: none;
-    transition: background 0.2s, transform 0.1s;
-    white-space: nowrap; margin-top: 6px;
+    transition: background 0.2s, transform 0.1s; white-space: nowrap; margin-top: 6px;
   }
   .wa-btn:hover { background: #1ebe5d; }
   .wa-btn:active { transform: scale(0.96); }
+
+  /* ── SETTINGS PANEL ── */
+  .settings-overlay {
+    position: fixed; inset: 0; background: var(--overlay);
+    z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  }
+  .settings-overlay.open { opacity: 1; pointer-events: all; }
+
+  .settings-panel {
+    position: fixed; top: 0; right: -340px; width: 320px; max-width: 90vw;
+    height: 100%; background: var(--surface); border-left: 1px solid var(--border);
+    z-index: 101; transition: right 0.28s cubic-bezier(.4,0,.2,1);
+    overflow-y: auto; padding: 24px 20px;
+    padding-top: max(24px, env(safe-area-inset-top));
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    box-shadow: -8px 0 40px rgba(0,0,0,0.3);
+  }
+  .settings-panel.open { right: 0; }
+
+  .settings-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .settings-header h2 { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; color: var(--text); }
+  .close-btn { background: none; border: none; color: var(--text2); font-size: 22px; cursor: pointer; padding: 4px; }
+  .close-btn:hover { color: var(--text); }
+
+  .settings-section { margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--border2); }
+  .settings-section:last-child { border-bottom: none; margin-bottom: 0; }
+  .settings-section-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--primary); margin-bottom: 14px; opacity: 0.8; }
+
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .toggle-label { font-size: 14px; font-weight: 500; color: var(--text); }
+  .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-track {
+    position: absolute; inset: 0; background: var(--border2);
+    border-radius: 24px; cursor: pointer; transition: background 0.2s;
+    border: 1px solid var(--border);
+  }
+  .toggle-track::before {
+    content: ''; position: absolute;
+    width: 18px; height: 18px; left: 2px; top: 2px;
+    background: var(--text2); border-radius: 50%; transition: transform 0.2s, background 0.2s;
+  }
+  .toggle-switch input:checked + .toggle-track { background: var(--primary); border-color: var(--primary); }
+  .toggle-switch input:checked + .toggle-track::before { transform: translateX(20px); background: #fff; }
+
+  .change-pin-form { display: grid; gap: 10px; margin-top: 12px; }
+  .change-pin-form input {
+    background: var(--bg); border: 1px solid var(--border2);
+    border-radius: 10px; color: var(--text); font-family: 'Barlow', sans-serif;
+    font-size: 15px; padding: 11px 14px; letter-spacing: 3px; width: 100%;
+  }
+  .change-pin-form input:focus { outline: none; border-color: var(--primary); }
+  .pin-change-msg { font-size: 12px; margin-top: 6px; display: none; }
+
+  .disclaimer-box {
+    background: var(--bg); border: 1px solid var(--border2);
+    border-radius: 12px; padding: 14px 16px;
+    font-size: 12px; color: var(--text2); line-height: 1.6;
+  }
+  .disclaimer-box p + p { margin-top: 8px; }
+  .disclaimer-box strong { color: var(--text); }
 </style>
 </head>
 <body>
 
-<!-- Migration banner -->
-<div id="migrationBanner" style="
-  position: relative;
-  z-index: 10;
-  background: rgba(251,146,60,0.10);
-  border-bottom: 1px solid rgba(251,146,60,0.25);
-  padding: 12px 20px;
-  text-align: center;
-  font-family: 'Barlow', sans-serif;
-  font-size: 13px;
-  color: #FB923C;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
-">
+<div class="settings-overlay" id="settingsOverlay" onclick="closeSettings()"></div>
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-header">
+    <h2>⚙ Settings</h2>
+    <button class="close-btn" onclick="closeSettings()">✕</button>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">Appearance</div>
+    <div class="toggle-row">
+      <span class="toggle-label">☀️ Light mode</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="lightModeToggle" onchange="toggleLightMode(this.checked)">
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">Security</div>
+    <div style="font-size:13px; color:var(--text2); margin-bottom:10px">Change your directory PIN</div>
+    <div class="change-pin-form">
+      <input type="password" id="currentPin" placeholder="Current PIN" maxlength="6">
+      <input type="password" id="newPin" placeholder="New PIN" maxlength="6">
+      <input type="password" id="confirmPin" placeholder="Confirm new PIN" maxlength="6">
+      <button class="btn" style="font-size:13px" onclick="changePin()">Update PIN</button>
+    </div>
+    <div class="pin-change-msg" id="pinChangeMsg"></div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">Disclaimer</div>
+    <div class="disclaimer-box">
+      <p><strong>SwAPP is not affiliated with Ryanair.</strong> It does not replace official Ryanair apps such as Ryanair Connect.</p>
+      <p>SwAPP only helps you <strong>find which roster can swap with you</strong> — the actual swap must be completed through the official Ryanair Connect app.</p>
+      <p><strong>Your colleagues' crew codes and phone numbers are stored only on your device</strong> (localStorage). No data is sent to any server.</p>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">Feedback & Support</div>
+    <div style="font-size:13px; color:var(--text2); margin-bottom:12px">Having trouble or want to suggest something? Write directly to the developer.</div>
+    <a href="https://wa.me/393407894585?text=Hi%2C%20I'm%20writing%20about%20SwApp%20%E2%80%94%20" target="_blank"
+       style="display:flex; align-items:center; justify-content:center; gap:10px;
+              padding:13px 20px; border-radius:12px;
+              background:rgba(37,211,102,0.07); border:1px solid rgba(37,211,102,0.18);
+              color:#25d366; text-decoration:none; font-family:'Barlow',sans-serif;
+              font-size:14px; font-weight:600;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.855L.057 23.882l6.204-1.448A11.935 11.935 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.366l-.36-.213-3.681.859.924-3.573-.234-.368A9.818 9.818 0 1112 21.818z"/>
+      </svg>
+      Feedback & Support
+    </a>
+  </div>
+</div>
+
+<div id="migrationBanner">
   📦 Coming from the old app? Go to <strong>Crew Code Directory → Import from someone</strong> to restore your contacts.
-  <button onclick="document.getElementById('migrationBanner').style.display='none'"
-    style="background:none; border:none; color:#FB923C; cursor:pointer; font-size:18px; line-height:1; padding:0 4px; margin-left:4px">✕</button>
+  <button onclick="document.getElementById('migrationBanner').style.display='none'">✕</button>
 </div>
 
 <div class="glow glow-1"></div>
@@ -348,10 +382,11 @@
 
   <header>
     <div class="logo">✈</div>
-    <div>
+    <div class="header-text">
       <h1>Sw<span class="highlight">APP</span> <span class="sub">Crew Swap</span></h1>
       <p>Cabin Crew Swap Calculator</p>
     </div>
+    <button class="settings-btn" onclick="openSettings()" aria-label="Settings">⚙️</button>
   </header>
 
   <div class="card">
@@ -406,13 +441,11 @@
   <button class="admin-toggle" onclick="toggleAdmin()">👥 Crew Code Directory</button>
 
   <div class="admin-panel card" id="adminPanel" style="margin-top:10px; display:none">
-
     <div id="pinSection">
       <div class="card-title" id="pinSectionTitle">Enter your PIN</div>
       <div class="pin-error" id="pinError">Incorrect PIN. Please try again.</div>
       <div class="pin-form">
-        <input type="password" id="pinInput" placeholder="PIN" maxlength="6"
-               onkeydown="if(event.key==='Enter') checkPin()">
+        <input type="password" id="pinInput" placeholder="PIN" maxlength="6" onkeydown="if(event.key==='Enter') checkPin()">
         <button class="btn" onclick="checkPin()">Enter</button>
       </div>
       <div id="pinHint" style="font-size:13px; color:var(--text2)">🔒 Enter your PIN to edit crew codes</div>
@@ -433,19 +466,13 @@
         </div>
         <div id="exportBox" style="display:none; margin-bottom:12px">
           <div style="font-size:11px; color:var(--text2); letter-spacing:1px; text-transform:uppercase; margin-bottom:8px">Copy this code and send it to your colleague:</div>
-          <textarea id="exportText" readonly
-            style="width:100%; height:100px; background:var(--bg); border:1px solid var(--border2);
-                   border-radius:10px; color:var(--primary); font-family:monospace; font-size:11px;
-                   padding:12px; resize:none; outline:none; word-break:break-all"></textarea>
+          <textarea id="exportText" readonly style="width:100%; height:100px; background:var(--bg); border:1px solid var(--border2); border-radius:10px; color:var(--primary); font-family:monospace; font-size:11px; padding:12px; resize:none; outline:none; word-break:break-all"></textarea>
           <button class="btn" style="width:100%; margin-top:8px; font-size:13px" onclick="copyExport()">📋 Copy to clipboard</button>
           <div id="exportCopiedMsg" style="text-align:center; margin-top:6px; font-size:12px; color:var(--green); display:none">✓ Copied! Send it via WhatsApp or any message.</div>
         </div>
         <div id="importBox" style="display:none">
           <div style="font-size:11px; color:var(--text2); letter-spacing:1px; text-transform:uppercase; margin-bottom:8px">Paste the code you received:</div>
-          <textarea id="importText" placeholder="Paste the exported code here..."
-            style="width:100%; height:100px; background:var(--bg); border:1px solid var(--border2);
-                   border-radius:10px; color:var(--text); font-family:monospace; font-size:11px;
-                   padding:12px; resize:none; outline:none; word-break:break-all"></textarea>
+          <textarea id="importText" placeholder="Paste the exported code here..." style="width:100%; height:100px; background:var(--bg); border:1px solid var(--border2); border-radius:10px; color:var(--text); font-family:monospace; font-size:11px; padding:12px; resize:none; outline:none; word-break:break-all"></textarea>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px">
             <button class="btn" onclick="importData()" style="font-size:13px">✅ Import</button>
             <button class="btn secondary" onclick="toggleImport()" style="font-size:13px">Cancel</button>
@@ -455,19 +482,6 @@
       </div>
     </div>
   </div>
-
-  <a href="https://wa.me/393407894585?text=Hi%2C%20I'm%20writing%20about%20SwApp%20%E2%80%94%20" target="_blank"
-     style="display:flex; align-items:center; justify-content:center; gap:10px;
-            margin-top:8px; padding:14px 20px; border-radius:12px;
-            background:rgba(37,211,102,0.06); border:1px solid rgba(37,211,102,0.15);
-            color:#25d366; text-decoration:none; font-family:'Barlow',sans-serif;
-            font-size:14px; font-weight:600;">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.855L.057 23.882l6.204-1.448A11.935 11.935 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.366l-.36-.213-3.681.859.924-3.573-.234-.368A9.818 9.818 0 1112 21.818z"/>
-    </svg>
-    Feedback & Suggestions
-  </a>
 
 </div>
 
@@ -492,203 +506,227 @@ const CREW = {
 };
 
 function mod16(x) { return ((x-1+16)%16)+1; }
-
-function getSwapRosters(myRoster, myDay) {
-  const isEarly = myDay <= 5;
-  const N = isEarly ? myDay : myDay - 8;
-  return isEarly ? [mod16(myRoster+8+N), mod16(myRoster+10+N)] : [mod16(myRoster+N), mod16(myRoster+2+N)];
+function getSwapRosters(r,d) {
+  const e=d<=5, N=e?d:d-8;
+  return e?[mod16(r+8+N),mod16(r+10+N)]:[mod16(r+N),mod16(r+2+N)];
 }
 
 function calculate() {
-  const myRoster  = parseInt(document.getElementById("myRoster").value);
-  const myDay     = parseInt(document.getElementById("myShift").value);
-  const container = document.getElementById("resultsContainer");
-  const badge     = document.getElementById("resultBadge");
-  if (!myRoster || !myDay) {
-    badge.style.display = "none";
-    container.innerHTML = `<div class="empty-state"><div class="big">🔍</div><p>Select your roster and the shift<br>you want to swap</p></div>`;
+  const r=parseInt(document.getElementById("myRoster").value);
+  const d=parseInt(document.getElementById("myShift").value);
+  const container=document.getElementById("resultsContainer");
+  const badge=document.getElementById("resultBadge");
+  if(!r||!d){
+    badge.style.display="none";
+    container.innerHTML=`<div class="empty-state"><div class="big">🔍</div><p>Select your roster and the shift<br>you want to swap</p></div>`;
     return;
   }
-  const results = getSwapRosters(myRoster, myDay).filter(r => r !== myRoster).map(r => ({roster:r}));
-  if (results.length === 0) {
-    badge.textContent = "0 available"; badge.className = "badge"; badge.style.display = "inline-block";
-    container.innerHTML = `<div class="no-result">😔 No colleagues available for this shift</div>`;
+  const results=getSwapRosters(r,d).filter(x=>x!==r).map(x=>({roster:x}));
+  if(!results.length){
+    badge.textContent="0 available"; badge.className="badge"; badge.style.display="inline-block";
+    container.innerHTML=`<div class="no-result">😔 No colleagues available for this shift</div>`;
     return;
   }
-  badge.textContent = results.length + " available"; badge.className = "badge green"; badge.style.display = "inline-block";
-  container.innerHTML = results.map((r, idx) => {
-    const raw = CREW[r.roster];
-    const colleagues = (Array.isArray(raw) ? raw : Object.values(raw||{})).filter(c => c && c.code && c.code.trim() !== "");
-    const colleaguesHtml = colleagues.length > 0
-      ? colleagues.map(c => {
-          const phone = (c.phone||"").replace(/[\s\-\+]/g,"");
-          const waBtn = phone
-            ? `<a class="wa-btn" href="https://wa.me/${phone}" target="_blank">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                  <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.855L.057 23.882l6.204-1.448A11.935 11.935 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.366l-.36-.213-3.681.859.924-3.573-.234-.368A9.818 9.818 0 1112 21.818z"/>
-                </svg>
-                ${c.code.toUpperCase()}
-              </a>`
-            : `<span class="crew-codes" style="font-size:14px">${c.code.toUpperCase()}</span>`;
-          return `<div style="display:flex;align-items:center;gap:8px;margin-top:4px">${waBtn}</div>`;
+  badge.textContent=results.length+" available"; badge.className="badge green"; badge.style.display="inline-block";
+  container.innerHTML=results.map((res,idx)=>{
+    const raw=CREW[res.roster];
+    const cols=(Array.isArray(raw)?raw:Object.values(raw||{})).filter(c=>c&&c.code&&c.code.trim());
+    const html=cols.length
+      ?cols.map(c=>{
+          const ph=(c.phone||"").replace(/[\s\-\+]/g,"");
+          const btn=ph
+            ?`<a class="wa-btn" href="https://wa.me/${ph}" target="_blank"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.855L.057 23.882l6.204-1.448A11.935 11.935 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.366l-.36-.213-3.681.859.924-3.573-.234-.368A9.818 9.818 0 1112 21.818z"/></svg>${c.code.toUpperCase()}</a>`
+            :`<span style="font-size:14px">${c.code.toUpperCase()}</span>`;
+          return `<div style="display:flex;align-items:center;gap:8px;margin-top:4px">${btn}</div>`;
         }).join("")
-      : `<div class="crew-codes empty">No crew codes added yet</div>`;
+      :`<div class="crew-codes empty">No crew codes added yet</div>`;
     return `<div class="result-item" style="animation-delay:${idx*0.06}s">
-      <div class="roster-badge"><span class="roster-label">Roster</span><span class="roster-num-big">${r.roster}</span></div>
-      <div class="result-info">${colleaguesHtml}</div>
+      <div class="roster-badge"><span class="roster-label">Roster</span><span class="roster-num-big">${res.roster}</span></div>
+      <div class="result-info">${html}</div>
       <div class="check">✓</div>
     </div>`;
   }).join("");
 }
 
-document.getElementById("myRoster").addEventListener("change", calculate);
-document.getElementById("myShift").addEventListener("change", calculate);
+document.getElementById("myRoster").addEventListener("change",calculate);
+document.getElementById("myShift").addEventListener("change",calculate);
 
-function loadSaved() {
-  try { const raw = localStorage.getItem("ryanair_crew"); if (raw) { const s = JSON.parse(raw); Object.keys(s).forEach(r => { CREW[r]=s[r]; }); } } catch(e) {}
+function loadSaved(){
+  try{const r=localStorage.getItem("ryanair_crew");if(r){const s=JSON.parse(r);Object.keys(s).forEach(k=>{CREW[k]=s[k];});}}catch(e){}
 }
 loadSaved();
+function getUserPin(){ return localStorage.getItem("swapp_pin")||null; }
 
-function getUserPin() { return localStorage.getItem("swapp_pin")||null; }
-
-function toggleAdmin() {
-  const panel = document.getElementById("adminPanel");
-  const isOpen = panel.style.display !== "none";
-  panel.style.display = isOpen ? "none" : "block";
-  if (!isOpen) {
-    const pin = getUserPin();
-    if (!pin) {
-      document.getElementById("pinSectionTitle").textContent = "Set your PIN";
-      document.getElementById("pinHint").textContent = "🔑 First time? Choose a PIN to protect your directory";
-      document.getElementById("pinInput").placeholder = "Choose a PIN";
+function toggleAdmin(){
+  const p=document.getElementById("adminPanel");
+  const open=p.style.display!=="none";
+  p.style.display=open?"none":"block";
+  if(!open){
+    const pin=getUserPin();
+    if(!pin){
+      document.getElementById("pinSectionTitle").textContent="Set your PIN";
+      document.getElementById("pinHint").textContent="🔑 First time? Choose a PIN to protect your directory";
+      document.getElementById("pinInput").placeholder="Choose a PIN";
     } else {
-      document.getElementById("pinSectionTitle").textContent = "Enter your PIN";
-      document.getElementById("pinHint").textContent = "🔒 Enter your PIN to edit crew codes";
-      document.getElementById("pinInput").placeholder = "PIN";
+      document.getElementById("pinSectionTitle").textContent="Enter your PIN";
+      document.getElementById("pinHint").textContent="🔒 Enter your PIN to edit crew codes";
+      document.getElementById("pinInput").placeholder="PIN";
     }
-    document.getElementById("pinSection").style.display = "block";
-    document.getElementById("rubricaSection").style.display = "none";
-    document.getElementById("pinInput").value = "";
+    document.getElementById("pinSection").style.display="block";
+    document.getElementById("rubricaSection").style.display="none";
+    document.getElementById("pinInput").value="";
   }
 }
 
-function checkPin() {
-  const val = document.getElementById("pinInput").value;
-  if (!val) return;
-  const savedPin = getUserPin();
-  if (!savedPin) {
-    localStorage.setItem("swapp_pin", val);
-    document.getElementById("pinSection").style.display = "none";
-    document.getElementById("rubricaSection").style.display = "block";
-    buildGrid();
-  } else if (val === savedPin) {
-    document.getElementById("pinSection").style.display = "none";
-    document.getElementById("rubricaSection").style.display = "block";
-    buildGrid();
-  } else {
-    const err = document.getElementById("pinError");
-    err.style.display = "block";
-    document.getElementById("pinInput").value = "";
-    setTimeout(() => err.style.display = "none", 2000);
+function checkPin(){
+  const val=document.getElementById("pinInput").value; if(!val)return;
+  const saved=getUserPin();
+  if(!saved){localStorage.setItem("swapp_pin",val);unlockAdmin();}
+  else if(val===saved){unlockAdmin();}
+  else{
+    const e=document.getElementById("pinError");e.style.display="block";
+    document.getElementById("pinInput").value="";
+    setTimeout(()=>e.style.display="none",2000);
   }
 }
 
-function lockAdmin() {
-  document.getElementById("pinSection").style.display = "block";
-  document.getElementById("rubricaSection").style.display = "none";
-  document.getElementById("adminPanel").style.display = "none";
-  document.getElementById("pinInput").value = "";
+function unlockAdmin(){
+  document.getElementById("pinSection").style.display="none";
+  document.getElementById("rubricaSection").style.display="block";
+  buildGrid();
 }
 
-function buildGrid() {
-  const grid = document.getElementById("rubricaGrid");
-  grid.innerHTML = Array.from({length:16},(_,i) => {
-    const R = i+1;
-    const colleagues = CREW[R]||[];
-    const rows = [0,1,2,3,4].map(k => {
-      const c = colleagues[k]||{code:"",phone:""};
+function lockAdmin(){
+  document.getElementById("pinSection").style.display="block";
+  document.getElementById("rubricaSection").style.display="none";
+  document.getElementById("adminPanel").style.display="none";
+  document.getElementById("pinInput").value="";
+}
+
+function buildGrid(){
+  const grid=document.getElementById("rubricaGrid");
+  grid.innerHTML=Array.from({length:16},(_,i)=>{
+    const R=i+1, cols=CREW[R]||[];
+    const rows=[0,1,2,3,4].map(k=>{
+      const c=cols[k]||{code:"",phone:""};
       return `<div class="rubrica-colleague-row" data-k="${k}">
         <input class="crew-input" data-r="${R}" data-k="${k}" data-field="code" value="${c.code||""}" placeholder="Crew code" oninput="autosave()">
         <input class="phone-input" data-r="${R}" data-k="${k}" data-field="phone" value="${c.phone||""}" placeholder="+39 333 123 4567" oninput="autosave()">
       </div>`;
     }).join("");
     return `<div class="rubrica-card rubrica-data-card" data-r="${R}">
-      <div class="rubrica-card-header">
-        <div class="roster-num">Roster ${R}</div>
-        <div class="rubrica-col-labels"><span>Crew Code</span><span>📱 WhatsApp</span></div>
-      </div>
+      <div class="rubrica-card-header"><div class="roster-num">Roster ${R}</div><div class="rubrica-col-labels"><span>Crew Code</span><span>📱 WhatsApp</span></div></div>
       <div class="rubrica-colleagues">${rows}</div>
     </div>`;
   }).join("");
 }
 
-function autosave() {
-  const newCrew = {};
-  document.querySelectorAll(".rubrica-data-card").forEach(card => {
-    const R = parseInt(card.dataset.r);
-    newCrew[R] = [0,1,2,3,4].map(k => {
-      const codeEl  = card.querySelector(`input[data-k="${k}"][data-field="code"]`);
-      const phoneEl = card.querySelector(`input[data-k="${k}"][data-field="phone"]`);
-      return { code: codeEl?codeEl.value.trim().toUpperCase():"", phone: phoneEl?phoneEl.value.trim():"" };
-    });
+function autosave(){
+  const nc={};
+  document.querySelectorAll(".rubrica-data-card").forEach(card=>{
+    const R=parseInt(card.dataset.r);
+    nc[R]=[0,1,2,3,4].map(k=>({
+      code:(card.querySelector(`input[data-k="${k}"][data-field="code"]`)||{}).value?.trim().toUpperCase()||"",
+      phone:(card.querySelector(`input[data-k="${k}"][data-field="phone"]`)||{}).value?.trim()||""
+    }));
   });
-  localStorage.setItem("ryanair_crew", JSON.stringify(newCrew));
-  Object.assign(CREW, newCrew);
-  calculate();
-  const msg = document.getElementById("saveMsg");
-  msg.textContent = "✓ Saved!"; msg.classList.add("show");
-  clearTimeout(window._saveTimer);
-  window._saveTimer = setTimeout(() => msg.classList.remove("show"), 1500);
+  localStorage.setItem("ryanair_crew",JSON.stringify(nc));
+  Object.assign(CREW,nc); calculate();
+  const m=document.getElementById("saveMsg");
+  m.textContent="✓ Saved!"; m.classList.add("show");
+  clearTimeout(window._st);
+  window._st=setTimeout(()=>m.classList.remove("show"),1500);
 }
 
-function exportData() {
+function exportData(){
   autosave();
-  const json = localStorage.getItem("ryanair_crew")||JSON.stringify(CREW);
-  const encoded = btoa(unescape(encodeURIComponent(json)));
-  document.getElementById("exportText").value = encoded;
-  document.getElementById("exportBox").style.display = "block";
-  document.getElementById("importBox").style.display = "none";
+  const enc=btoa(unescape(encodeURIComponent(localStorage.getItem("ryanair_crew")||JSON.stringify(CREW))));
+  document.getElementById("exportText").value=enc;
+  document.getElementById("exportBox").style.display="block";
+  document.getElementById("importBox").style.display="none";
 }
 
-function copyExport() {
-  const text = document.getElementById("exportText");
-  text.select();
-  document.execCommand("copy");
-  navigator.clipboard && navigator.clipboard.writeText(text.value).catch(()=>{});
-  const msg = document.getElementById("exportCopiedMsg");
-  msg.style.display = "block";
-  setTimeout(() => msg.style.display = "none", 3000);
+function copyExport(){
+  const t=document.getElementById("exportText");t.select();document.execCommand("copy");
+  navigator.clipboard&&navigator.clipboard.writeText(t.value).catch(()=>{});
+  const m=document.getElementById("exportCopiedMsg");m.style.display="block";
+  setTimeout(()=>m.style.display="none",3000);
 }
 
-function toggleImport() {
-  const box = document.getElementById("importBox");
-  box.style.display = box.style.display==="none" ? "block" : "none";
-  document.getElementById("exportBox").style.display = "none";
-  document.getElementById("importText").value = "";
-  document.getElementById("importMsg").style.display = "none";
+function toggleImport(){
+  const b=document.getElementById("importBox");
+  b.style.display=b.style.display==="none"?"block":"none";
+  document.getElementById("exportBox").style.display="none";
+  document.getElementById("importText").value="";
+  document.getElementById("importMsg").style.display="none";
 }
 
-function importData() {
-  const raw = document.getElementById("importText").value.trim();
-  const msg = document.getElementById("importMsg");
-  if (!raw) { msg.textContent="⚠️ Please paste a code first."; msg.style.color="var(--red)"; msg.style.display="block"; return; }
-  try {
-    const json = decodeURIComponent(escape(atob(raw)));
-    const imported = JSON.parse(json);
-    if (typeof imported !== "object"||!imported[1]) throw new Error("Invalid");
-    localStorage.setItem("ryanair_crew", JSON.stringify(imported));
-    Object.assign(CREW, imported);
-    buildGrid(); calculate();
-    msg.textContent="✅ Directory imported successfully!"; msg.style.color="var(--green)"; msg.style.display="block";
-    document.getElementById("importText").value = "";
-    setTimeout(() => { document.getElementById("importBox").style.display="none"; msg.style.display="none"; }, 2000);
-  } catch(e) {
-    msg.textContent="❌ Invalid code. Make sure you copied it completely."; msg.style.color="var(--red)"; msg.style.display="block";
+function importData(){
+  const raw=document.getElementById("importText").value.trim();
+  const m=document.getElementById("importMsg");
+  if(!raw){m.textContent="⚠️ Please paste a code first.";m.style.color="var(--red)";m.style.display="block";return;}
+  try{
+    const imp=JSON.parse(decodeURIComponent(escape(atob(raw))));
+    if(typeof imp!=="object"||!imp[1])throw new Error();
+    localStorage.setItem("ryanair_crew",JSON.stringify(imp));
+    Object.assign(CREW,imp);buildGrid();calculate();
+    m.textContent="✅ Directory imported successfully!";m.style.color="var(--green)";m.style.display="block";
+    document.getElementById("importText").value="";
+    setTimeout(()=>{document.getElementById("importBox").style.display="none";m.style.display="none";},2000);
+  }catch(e){m.textContent="❌ Invalid code. Make sure you copied it completely.";m.style.color="var(--red)";m.style.display="block";}
+}
+
+function openSettings(){
+  document.getElementById("settingsPanel").classList.add("open");
+  document.getElementById("settingsOverlay").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+
+function closeSettings(){
+  document.getElementById("settingsPanel").classList.remove("open");
+  document.getElementById("settingsOverlay").classList.remove("open");
+  document.body.style.overflow="";
+  document.getElementById("currentPin").value="";
+  document.getElementById("newPin").value="";
+  document.getElementById("confirmPin").value="";
+  document.getElementById("pinChangeMsg").style.display="none";
+}
+
+function toggleLightMode(on){
+  document.body.classList.toggle("light",on);
+  localStorage.setItem("swapp_theme",on?"light":"dark");
+  document.getElementById("themeColor").content=on?"#4F46E5":"#1C1C28";
+}
+
+(function initTheme(){
+  const t=localStorage.getItem("swapp_theme");
+  if(t==="light"){
+    document.body.classList.add("light");
+    document.getElementById("lightModeToggle").checked=true;
+    document.getElementById("themeColor").content="#4F46E5";
   }
+})();
+
+function changePin(){
+  const cur=document.getElementById("currentPin").value;
+  const nw=document.getElementById("newPin").value;
+  const cf=document.getElementById("confirmPin").value;
+  const m=document.getElementById("pinChangeMsg");
+  const saved=getUserPin();
+  m.style.display="block";
+  if(!saved){m.textContent="⚠️ No PIN set yet. Set one via Crew Code Directory first.";m.style.color="var(--red)";return;}
+  if(cur!==saved){m.textContent="❌ Current PIN is incorrect.";m.style.color="var(--red)";return;}
+  if(!nw||nw.length<4){m.textContent="⚠️ New PIN must be at least 4 digits.";m.style.color="var(--red)";return;}
+  if(nw!==cf){m.textContent="❌ New PINs don't match.";m.style.color="var(--red)";return;}
+  localStorage.setItem("swapp_pin",nw);
+  document.getElementById("currentPin").value="";
+  document.getElementById("newPin").value="";
+  document.getElementById("confirmPin").value="";
+  m.textContent="✅ PIN updated successfully!";m.style.color="var(--green)";
+  setTimeout(()=>m.style.display="none",2500);
 }
 
-if ('serviceWorker' in navigator) {
+if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 </script>

@@ -1,4 +1,4 @@
-const CACHE = 'swapp-v6';
+const CACHE = 'swapp-v2.1.7';
 const ASSETS = [
   '/',
   '/index.html',
@@ -40,4 +40,7 @@ self.addEventListener('fetch', e => {
       }).catch(() => caches.match('/index.html'));
     })
   );
+});
+self.addEventListener('message', e => {
+  if(e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
 });

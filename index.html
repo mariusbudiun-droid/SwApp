@@ -11,8 +11,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SwAPP">
 <link rel="apple-touch-icon" href="icon-192.png">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -366,23 +364,6 @@
   <div style="font-size:13px; color:var(--text2); margin-bottom:12px">
     Share this app with your colleagues or save it to your phone's home screen.
   </div>
-  <div class="settings-section">
-  <div class="settings-section-title">Share Contacts</div>
-  <div style="font-size:13px; color:var(--text2); margin-bottom:14px">
-    Show a QR code your colleague can scan to import your directory instantly.
-  </div>
-  <button class="btn" style="font-size:13px; width:100%" onclick="generateContactsQR()">
-    📇 Generate QR code
-  </button>
-  <div id="qrMsg" style="font-size:12px; margin-top:8px; display:none; color:var(--text2)"></div>
-  <div id="qrContainer" style="display:none; margin-top:16px; text-align:center">
-    <div id="qrCanvas" style="display:inline-block; background:#fff; padding:14px; border-radius:12px;"></div>
-    <div style="font-size:11px; color:var(--text2); margin-top:10px; line-height:1.5">
-      Colleague scans this QR → opens the app → contacts imported automatically.
-    </div>
-    <button class="btn secondary" style="font-size:12px; margin-top:10px; width:100%" onclick="closeQR()">✕ Close</button>
-  </div>
-</div>
 
   <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
     <button class="btn" style="font-size:13px" onclick="copyAppLink()">

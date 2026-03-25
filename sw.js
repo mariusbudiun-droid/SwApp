@@ -1,4 +1,4 @@
-const CACHE = 'swapp-v5';
+const CACHE = 'swapp-v6';
 const ASSETS = [
   '/',
   '/index.html',

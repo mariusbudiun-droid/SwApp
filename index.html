@@ -740,6 +740,10 @@ function openSettings(){
   document.getElementById("settingsOverlay").classList.add("open");
   document.body.style.overflow="hidden";
 }
+function toggleChangePinForm(){
+  const f = document.getElementById("changePinForm");
+  f.style.display = f.style.display === "none" ? "block" : "none";
+}
 
 function closeSettings(){
   document.getElementById("settingsPanel").classList.remove("open");
